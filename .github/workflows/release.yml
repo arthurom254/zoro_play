@@ -1,0 +1,64 @@
+name: Build and release
+
+on:
+  push:
+    branches: [ main ]
+    paths: [ version.txt ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            6.0.x
+            8.0.x
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Read version
+        id: v
+        shell: bash
+        run: echo "version=$(tr -d '[:space:]' < version.txt)" >> "$GITHUB_OUTPUT"
+
+      - name: Stamp version into electron manifest
+        shell: bash
+        run: |
+          sed -i -E 's/"buildVersion": *"[^"]*"/"buildVersion": "${{ steps.v.outputs.version }}"/' electron.manifest.json
+
+      - name: Install electronize
+        run: dotnet tool install ElectronNET.CLI -g --version 23.6.2
+
+      - name: Build installer
+        run: electronize build /target win
+
+      - name: Locate installer
+        id: pkg
+        shell: bash
+        run: |
+          f=$(ls bin/Desktop/*Setup*.exe | head -n1)
+          echo "file=$f" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="v${{ steps.v.outputs.version }}"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" "${{ steps.pkg.outputs.file }}" --clobber
+          else
+            gh release create "$tag" "${{ steps.pkg.outputs.file }}" \
+              --target "${{ github.sha }}" \
+              --title "$tag" \
+              --generate-notes
+          fi

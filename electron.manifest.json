@@ -1,0 +1,27 @@
+{
+  "executable": "ZoroPlay",
+  "name": "ZoroPlay",
+  "author": "You",
+  "singleInstance": true,
+  "environment": "Production",
+  "build": {
+    "appId": "com.example.zoroplay",
+    "productName": "Zoro Play",
+    "copyright": "Copyright © 2026",
+    "buildVersion": "1.0.0",
+    "compression": "maximum",
+    "electronLanguages": ["en-US"],
+    "directories": { "output": "../../../bin/Desktop" },
+    "extraResources": [ { "from": "./bin", "to": "bin", "filter": [ "**/*" ] } ],
+    "files": [
+      { "from": "./ElectronHostHook/node_modules", "to": "ElectronHostHook/node_modules", "filter": [ "**/*" ] },
+      "**/*"
+    ],
+    "win": { "target": "nsis" },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "artifactName": "ZoroPlay-Setup-${version}.${ext}"
+    }
+  }
+}
