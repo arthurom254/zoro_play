@@ -1,11 +1,11 @@
 {
   "executable": "ZoroPlay",
   "name": "ZoroPlay",
-  "author": "You",
+  "author": "arthurom254",
   "singleInstance": true,
   "environment": "Production",
   "build": {
-    "appId": "com.example.zoroplay",
+    "appId": "ke.co.playcool.zoroplay",
     "productName": "Zoro Play",
     "copyright": "Copyright © 2026",
     "buildVersion": "1.0.0",
